@@ -1,5 +1,5 @@
 import { generateMockAds } from './mock-data.js';
-import { initForm } from './form.js';
+import { initForm, toggleForm } from './form.js';
 
 const mockAds = generateMockAds();
 
@@ -8,3 +8,5 @@ mapCanvas.appendChild(mockAds[0]);
 
 
 initForm();
+toggleForm(false);
+toggleForm(true);
