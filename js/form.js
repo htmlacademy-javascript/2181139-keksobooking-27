@@ -1,3 +1,5 @@
+const form = document.querySelector('.ad-form');
+const filtersForm = document.querySelector('.map__filters');
 
 function initForm() {
   const typeSelect = document.querySelector('#type');
@@ -38,7 +40,7 @@ function initForm() {
     timeInSelect.value = evt.target.value;
   });
 
-  const form = document.querySelector('.ad-form');
+
   const pristine = new Pristine(form, {
     // class of the parent element where the error/success class is added
     classTo: 'ad-form__element',
@@ -55,7 +57,6 @@ function initForm() {
   form.addEventListener('submit', (evt)=> {
     const valid = pristine.validate();
     if(!valid){
-      console.log(pristine.getErrors());
       evt.preventDefault();
     }
   });
@@ -78,5 +79,43 @@ function initForm() {
   }, 'Wrong capacity', 1, false);
 }
 
+const disableForm = function() {
+  form.classList.add('ad-form--disabled');
+  for (const el of form.children) {
+    if (el.tagName === 'FIELDSET'){
+      el.disabled = true;
+    }
+  }
+  filtersForm.classList.add('map__filters--disabled');
+  for (const el of filtersForm.children) {
+    if (el.tagName === 'FIELDSET' || el.tagName === 'SELECT'){
+      el.disabled = true;
+    }
+  }
+};
+const enableForm = function() {
+  form.classList.remove('ad-form--disabled');
+  for (const el of form.children) {
+    if (el.tagName === 'FIELDSET'){
+      el.disabled = false;
+    }
+  }
+  filtersForm.classList.remove('map__filters--disabled');
+  for (const el of filtersForm.children) {
+    if (el.tagName === 'FIELDSET' || el.tagName === 'SELECT'){
+      el.disabled = false;
+    }
+  }
 
-export { initForm };
+};
+
+const toggleForm = function(active) {
+  if (active){
+    enableForm();
+  } else {
+    disableForm();
+  }
+};
+export { initForm, toggleForm};
+
+
