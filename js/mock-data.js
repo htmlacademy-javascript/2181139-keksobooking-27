@@ -16,10 +16,22 @@ const titles = [
 ];
 
 const addresses = [
-  '1600 Pennsylvania Avenue, Washington, D.C., USA',
-  '4 Privet Drive, Little Whinging, Surrey',
-  '221B Baker St., London',
-  '350 Fifth Avenue, New York City, NY 10118'
+  {
+    lat: 35.636362,
+    lng: 139.350206,
+  },
+  {
+    lat: 35.618131,
+    lng: 139.328577,
+  },
+  {
+    lat: 35.609666,
+    lng: 139.310420,
+  },
+  {
+    lat: 35.596857,
+    lng: 139.302143,
+  },
 ];
 
 const prices = [
@@ -104,7 +116,8 @@ function generateMockAds() {
 
   const adTemplate = document.querySelector('#card').content;
 
-  const cards = [];
+  const ads = [];
+
 
   for (const adData of adsData) {
     const clone = adTemplate.cloneNode(true);
@@ -145,10 +158,13 @@ function generateMockAds() {
 
     clone.querySelector('.popup__photo').src = adData.photo;
 
-    cards.push(clone);
+    ads.push({
+      data: adData,
+      card: clone,
+    });
   }
 
-  return cards;
+  return ads;
 }
 
 
