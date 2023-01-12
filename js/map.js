@@ -59,8 +59,8 @@ const populateMap = function (ads) {
   for (const ad of ads){
     const pinMarker = L.marker(
       {
-        lat: ad.data.address.lat,
-        lng: ad.data.address.lng,
+        lat: ad.location.lat,
+        lng: ad.location.lng,
       },
       {
 
