@@ -1,5 +1,43 @@
+import { publishAd } from './server.js';
+import { resetMap } from './map.js';
+
 const form = document.querySelector('.ad-form');
 const filtersForm = document.querySelector('.map__filters');
+
+
+const showSuccessMessage = function() {
+  const successMessage = document.querySelector('#success').content;
+  const cloneSuccess = successMessage.cloneNode(true);
+  document.body.appendChild(cloneSuccess);
+  const successElement = document.querySelector('.success');
+  document.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Escape') {
+      successElement.remove();
+    }
+  });
+  document.body.addEventListener('click', () => successElement.remove());
+};
+
+const showErrorMessage = function() {
+  const errorMessage = document.querySelector('#error').content;
+  const cloneError = errorMessage.cloneNode(true);
+
+  document.body.appendChild(cloneError);
+  const errorElement = document.querySelector('.error');
+  cloneError.querySelector('.error__button').addEventListener('click', () => errorElement.remove());
+
+  document.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Escape'){
+      errorElement.remove();
+    }
+  });
+  document.body.addEventListener('click', () => errorElement.remove());
+};
+
+const resetForms = function () {
+  form.reset();
+  filtersForm.reset();
+};
 
 function initForm() {
   const typeSelect = document.querySelector('#type');
@@ -55,16 +93,33 @@ function initForm() {
   });
 
   form.addEventListener('submit', (evt)=> {
+    evt.preventDefault();
     const valid = pristine.validate();
-    if(!valid){
-      evt.preventDefault();
+    if (!valid) {
+      return;
     }
+    const submit = document.querySelector('.ad-form__submit');
+    submit.disabled = true;
+    publishAd(new FormData(evt.target)).then(() => {
+      submit.disabled = false;
+      resetForms();
+      resetMap();
+      showSuccessMessage();
+    }).catch(() => {
+      submit.disabled = false;
+      showErrorMessage();
+    });
+  });
+
+  document.querySelector('.ad-form__reset').addEventListener('click', () => {
+    resetForms();
+    resetMap();
+
   });
 
   const capacity = document.querySelector('#capacity');
   const roomNumber = document.querySelector('#room_number');
   pristine.addValidator(capacity, (value) => {
-
     switch(value) {
       case '3':
         return roomNumber.value === '3';
@@ -108,6 +163,7 @@ const enableForm = function() {
   }
 
 };
+
 
 const toggleForm = function(active) {
   if (active){
