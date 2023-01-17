@@ -53,6 +53,22 @@ function initPristine() {
     // class of the error text element
     errorTextClass: 'text-help'
   });
+
+  const capacity = document.querySelector('#capacity');
+  const roomNumber = document.querySelector('#room_number');
+  pristine.addValidator(capacity, (value) => {
+    switch(value) {
+      case '3':
+        return roomNumber.value === '3';
+      case '2':
+        return roomNumber.value === '2' || roomNumber.value === '3';
+      case '1':
+        return roomNumber.value === '1' || roomNumber.value === '2' || roomNumber.value === '3';
+      case '0':
+        return roomNumber.value === '100';
+    }
+    return false;
+  }, 'Wrong capacity', 1, false);
 }
 
 function initForm() {
@@ -60,7 +76,7 @@ function initForm() {
   initSlider();
 
   const typeSelect = document.querySelector('#type');
-  const price = document.querySelector('#price');
+  const priceInput = document.querySelector('#price');
   let minPrice;
 
   typeSelect.addEventListener('change', (evt) => {
@@ -81,12 +97,14 @@ function initForm() {
         minPrice = 10000;
         break;
     }
-    price.min = minPrice;
-    price.placeholder = minPrice;
+    priceInput.min = minPrice;
+    priceInput.placeholder = minPrice;
     setMinSliderValue(minPrice);
     pristine.reset();
     initPristine(form);
-    pristine.validate(price);
+    if (priceInput.value !== '') {
+      pristine.validate(priceInput);
+    }
   });
 
   const timeInSelect = document.querySelector('#timein');
@@ -128,22 +146,6 @@ function initForm() {
     resetForms();
     resetMap();
   });
-
-  const capacity = document.querySelector('#capacity');
-  const roomNumber = document.querySelector('#room_number');
-  pristine.addValidator(capacity, (value) => {
-    switch(value) {
-      case '3':
-        return roomNumber.value === '3';
-      case '2':
-        return roomNumber.value === '2' || roomNumber.value === '3';
-      case '1':
-        return roomNumber.value === '1' || roomNumber.value === '2' || roomNumber.value === '3';
-      case '0':
-        return roomNumber.value === '100';
-    }
-    return false;
-  }, 'Wrong capacity', 1, false);
 }
 
 const disableForm = function() {
