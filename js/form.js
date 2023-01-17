@@ -2,9 +2,9 @@ import { publishAd } from './server.js';
 import { resetMap } from './map.js';
 import { initSlider, setMinSliderValue } from './slider.js';
 
+let pristine;
 const form = document.querySelector('.ad-form');
 const filtersForm = document.querySelector('.map__filters');
-
 
 const showSuccessMessage = function() {
   const successMessage = document.querySelector('#success').content;
@@ -25,10 +25,10 @@ const showErrorMessage = function() {
 
   document.body.appendChild(cloneError);
   const errorElement = document.querySelector('.error');
-  cloneError.querySelector('.error__button').addEventListener('click', () => errorElement.remove());
+  errorElement.querySelector('.error__button').addEventListener('click', () => errorElement.remove());
 
   document.addEventListener('keydown', (evt) => {
-    if (evt.key === 'Escape'){
+    if (evt.key === 'Escape') {
       errorElement.remove();
     }
   });
@@ -40,36 +40,53 @@ const resetForms = function () {
   filtersForm.reset();
 };
 
+function initPristine() {
+  pristine = new Pristine(form, {
+    // class of the parent element where the error/success class is added
+    classTo: 'ad-form__element',
+    errorClass: 'has-danger',
+    successClass: 'has-success',
+    // class of the parent element where error text element is appended
+    errorTextParent: 'ad-form__element',
+    // type of element to create for the error text
+    errorTextTag: 'span',
+    // class of the error text element
+    errorTextClass: 'text-help'
+  });
+}
+
 function initForm() {
+  initPristine();
   initSlider();
 
   const typeSelect = document.querySelector('#type');
   const price = document.querySelector('#price');
- 
+  let minPrice;
+
   typeSelect.addEventListener('change', (evt) => {
-    switch(evt.target.value) {
+    switch (evt.target.value) {
       case 'bungalow':
-        price.min = 0;
-        price.placeholder = '0';
+        minPrice = 0;
         break;
       case 'flat':
-        price.min = 1000;
-        price.placeholder = '1000';
+        minPrice = 1000;
         break;
       case 'hotel':
-        price.min = 3000;
-        price.placeholder = '3000';
+        minPrice = 3000;
         break;
       case 'house':
-        price.min = 5000;
-        price.placeholder = '5000';
+        minPrice = 5000;
         break;
       case 'palace':
-        price.min = 10000;
-        price.placeholder = '10000';
+        minPrice = 10000;
         break;
     }
-    setMinSliderValue(price.min);
+    price.min = minPrice;
+    price.placeholder = minPrice;
+    setMinSliderValue(minPrice);
+    pristine.reset();
+    initPristine(form);
+    pristine.validate(price);
   });
 
   const timeInSelect = document.querySelector('#timein');
@@ -83,20 +100,6 @@ function initForm() {
     timeInSelect.value = evt.target.value;
   });
 
-
-  const pristine = new Pristine(form, {
-    // class of the parent element where the error/success class is added
-    classTo: 'ad-form__element',
-    errorClass: 'has-danger',
-    successClass: 'has-success',
-    // class of the parent element where error text element is appended
-    errorTextParent: 'ad-form__element',
-    // type of element to create for the error text
-    errorTextTag: 'span',
-    // class of the error text element
-    errorTextClass: 'text-help'
-  });
-
   form.addEventListener('submit', (evt)=> {
     evt.preventDefault();
     const valid = pristine.validate();
@@ -105,7 +108,12 @@ function initForm() {
     }
     const submit = document.querySelector('.ad-form__submit');
     submit.disabled = true;
-    publishAd(new FormData(evt.target)).then(() => {
+    publishAd(new FormData(evt.target)).then((resp) => {
+      if (resp.status !== 200) {
+        submit.disabled = false;
+        showErrorMessage();
+        return;
+      }
       submit.disabled = false;
       resetForms();
       resetMap();
@@ -119,7 +127,6 @@ function initForm() {
   document.querySelector('.ad-form__reset').addEventListener('click', () => {
     resetForms();
     resetMap();
-
   });
 
   const capacity = document.querySelector('#capacity');

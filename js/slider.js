@@ -4,18 +4,15 @@ const inputValue = document.querySelector('#price');
 const initSlider = function () {
   noUiSlider.create(sliderElement, {
     range: {
-      min: 0,
+      min: 1000,
       max: 100000,
     },
-    start: 0,
+    start: 5000,
     connect: 'lower',
     step: 1000,
     format: {
       to: function(val){
-        if (Number.isInteger(val)) {
-          return val.toFixed(0);
-        }
-        return val.toFixed(1);
+        return val.toFixed(0);
       },
       from: function(val) {
         return parseFloat(val);
@@ -23,22 +20,20 @@ const initSlider = function () {
     }
   });
 
-  sliderElement.noUiSlider.on('update', () => {
+  sliderElement.noUiSlider.on('slide', () => {
     inputValue.value = sliderElement.noUiSlider.get();
   });
 
-  // inputValue.addEventListener('change', (evt) => sliderElement.noUiSlider.set(evt.target.value));
+  inputValue.addEventListener('change', (evt) => sliderElement.noUiSlider.set(evt.target.value));
 };
 
-const setMinSliderValue = function(minParam) {
-  const min = parseFloat(minParam);
+const setMinSliderValue = function(min) {
   sliderElement.noUiSlider.updateOptions({
     range: {
       min,
       max: 100000
     }
   });
-  sliderElement.noUiSlider.set(min);
 };
 
 export {initSlider, setMinSliderValue};
