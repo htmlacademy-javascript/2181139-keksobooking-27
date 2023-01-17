@@ -1,5 +1,6 @@
 import { publishAd } from './server.js';
 import { resetMap } from './map.js';
+import { initSlider, setMinSliderValue } from './slider.js';
 
 const form = document.querySelector('.ad-form');
 const filtersForm = document.querySelector('.map__filters');
@@ -40,8 +41,11 @@ const resetForms = function () {
 };
 
 function initForm() {
+  initSlider();
+
   const typeSelect = document.querySelector('#type');
   const price = document.querySelector('#price');
+ 
   typeSelect.addEventListener('change', (evt) => {
     switch(evt.target.value) {
       case 'bungalow':
@@ -65,6 +69,7 @@ function initForm() {
         price.placeholder = '10000';
         break;
     }
+    setMinSliderValue(price.min);
   });
 
   const timeInSelect = document.querySelector('#timein');
