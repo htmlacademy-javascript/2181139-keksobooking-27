@@ -1,4 +1,4 @@
-import { publishAd } from './server.js';
+import { getAds, publishAd } from './server.js';
 import { resetMap } from './map.js';
 import { initSlider, setMinSliderValue } from './slider.js';
 
@@ -101,7 +101,7 @@ function initForm() {
     priceInput.placeholder = minPrice;
     setMinSliderValue(minPrice);
     pristine.reset();
-    initPristine(form);
+    initPristine();
     if (priceInput.value !== '') {
       pristine.validate(priceInput);
     }
@@ -148,7 +148,7 @@ function initForm() {
   });
 }
 
-const disableForm = function() {
+const disableForms = function() {
   form.classList.add('ad-form--disabled');
   for (const el of form.children) {
     if (el.tagName === 'FIELDSET'){
@@ -162,6 +162,7 @@ const disableForm = function() {
     }
   }
 };
+
 const enableForm = function() {
   form.classList.remove('ad-form--disabled');
   for (const el of form.children) {
@@ -169,23 +170,153 @@ const enableForm = function() {
       el.disabled = false;
     }
   }
+};
+
+const enableFilterForm = function() {
   filtersForm.classList.remove('map__filters--disabled');
   for (const el of filtersForm.children) {
     if (el.tagName === 'FIELDSET' || el.tagName === 'SELECT'){
       el.disabled = false;
     }
   }
+};
+
+const checkHousingType = function(ad) {
+  const housingType = document.querySelector('#housing-type').value;
+  switch (housingType){
+    case 'any':
+      return true;
+    default:
+      return housingType === ad.offer.type;
+  }
 
 };
 
-
-const toggleForm = function(active) {
-  if (active){
-    enableForm();
-  } else {
-    disableForm();
+const checkHousingPrice = function(ad) {
+  const housePrice = document.querySelector('#housing-price').value;
+  switch (housePrice){
+    case 'any':
+      return true;
+    case 'middle':
+      return ad.offer.price >= 10000 && ad.offer.price < 50000;
+    case 'low':
+      return ad.offer.price < 10000;
+    case 'high':
+      return ad.offer.price >= 50000;
   }
 };
-export { initForm, toggleForm};
+
+const checkHousingRooms = function(ad) {
+  const houseRooms = document.querySelector('#housing-rooms').value;
+  switch (houseRooms) {
+    case 'any':
+      return true;
+    default:
+      return parseFloat(houseRooms) === ad.offer.rooms;
+  }
+};
+
+const checkHousingGuests = function(ad) {
+  const houseGuests = document.querySelector('#housing-guests').value;
+  switch (houseGuests) {
+    case 'any':
+      return true;
+    default:
+      return parseFloat(houseGuests) === ad.offer.guests;
+  }
+};
+
+const getSelectedFeatures = function() {
+  const featuresFieldSetChildren = document.querySelector('#housing-features').children;
+  const features = [];
+  for (const child of featuresFieldSetChildren) {
+    if (child.name === 'features' && child.checked) {
+      features.push(child.value);
+    }
+  }
+
+  return features;
+};
+
+const getFilter = function() {
+  const limit = 10;
+  const selectedFeatures = getSelectedFeatures();
+  const filter = function(ads) {
+    let filteredAds = ads.filter((ad) => {
+      if (!checkHousingType(ad)) {
+        return false;
+      }
+      if (!checkHousingPrice(ad)) {
+        return false;
+      }
+      if (!checkHousingRooms(ad)) {
+        return false;
+      }
+      if (!checkHousingGuests(ad)) {
+        return false;
+      }
+      return true;
+    });
+    filteredAds.forEach((ad) => {
+      const adFeatures = ad.offer.features || [];
+      let rank = 0;
+      for (const selectedFeature of selectedFeatures) {
+        if (adFeatures.includes(selectedFeature)) {
+          rank++;
+        }
+      }
+      ad.rank = rank;
+      ad.rankB = adFeatures.length;
+    });
+
+    filteredAds.sort((a, b) => {
+      if (a.rank > b.rank) {
+        return -1;
+      } else if (a.rank < b.rank) {
+        return 1;
+      }
+
+      if (a.rankB > b.rankB) {
+        return -1;
+      } else if (a.rankB < b.rankB) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    if (filteredAds.length > limit) {
+      filteredAds = filteredAds.slice(0, limit);
+    }
+
+    return filteredAds;
+  };
+
+  return filter;
+};
+
+const initFilterForm = function() {
+  const filterElements = filtersForm.querySelectorAll('select');
+  filterElements.forEach((filterElement) => {
+    filterElement.addEventListener('change', () => getAds(getFilter()) );
+  });
+  const features = filtersForm.querySelectorAll('input');
+  features.forEach((feature) => {
+    feature.addEventListener('change', () => getAds(getFilter()) );
+  });
+};
+
+
+const toggleForms = function(active) {
+  if (active){
+    enableForm();
+    enableFilterForm();
+  } else {
+    disableForms();
+  }
+};
+
+
+export { initForm, toggleForms, enableFilterForm, enableForm, getFilter, initFilterForm} ;
 
 
