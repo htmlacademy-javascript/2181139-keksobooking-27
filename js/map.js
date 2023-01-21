@@ -1,4 +1,5 @@
-import { toggleForm } from './form.js';
+import { enableForm, getFilter } from './form.js';
+import { getAds } from './server.js';
 
 const lat = 35.68114;
 const lng = 139.7511;
@@ -12,10 +13,13 @@ const latLngToString = function (latLng, roundToDec = 5) {
 let map;
 let mainPinMarker;
 
+let pinMarkers = [];
+
 const initMap = function () {
   map = L.map('map-canvas', { tap: false })
     .on('load', () => {
-      toggleForm(true);
+      enableForm(true);
+      getAds(getFilter());
     })
     .setView({
       lat: 35.68114,
@@ -54,6 +58,15 @@ const initMap = function () {
   mainPinMarker.addTo(map);
 };
 
+const clearMap = function() {
+  if (map) {
+    map.closePopup();
+  }
+
+  pinMarkers.forEach((marker) => map.removeLayer(marker));
+  pinMarkers = [];
+};
+
 const populateMap = function (ads) {
   const pinIcon = L.icon({
     iconUrl: './img/pin.svg',
@@ -73,8 +86,8 @@ const populateMap = function (ads) {
     );
     pinMarker.addTo(map)
       .bindPopup(ad.card);
+    pinMarkers.push(pinMarker);
   }
-
 };
 
 const resetMap = function () {
@@ -82,5 +95,5 @@ const resetMap = function () {
   mainPinMarker.setLatLng(newLatLng);
   map.closePopup();
 };
-export {initMap, populateMap, resetMap};
+export {initMap, populateMap, resetMap, clearMap};
 

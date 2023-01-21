@@ -1,22 +1,25 @@
-import { populateMap } from './map.js';
-import { generateAds } from './utils.js';
+import { enableFilterForm } from './form.js';
+import { populateMap, clearMap } from './map.js';
+import { generateAds, debounce } from './utils.js';
 
 const errorPopUp = document.querySelector('.network-error');
 
-const getAds = function() {
+const getAds = debounce((filter) => {
+  clearMap();
   fetch('https://27.javascript.pages.academy/keksobooking/data')
     .then((response) => response.json())
     .then((ads) => {
-      const adsWithHTML = generateAds(ads);
+      const adsWithHTML = generateAds(filter(ads));
       populateMap(adsWithHTML);
+      enableFilterForm(true);
       errorPopUp.classList.add('hidden');
     })
     .catch(() => {
+      enableFilterForm(false);
       errorPopUp.classList.remove('hidden');
     });
+});
 
-
-};
 const publishAd = function(formData) {
   return fetch('https://27.javascript.pages.academy/keksobooking',
     {
@@ -25,4 +28,4 @@ const publishAd = function(formData) {
     });
 };
 
-export {getAds , publishAd};
+export {getAds, publishAd};
