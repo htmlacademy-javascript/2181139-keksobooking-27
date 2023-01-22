@@ -1,6 +1,7 @@
 import { getAds, publishAd } from './server.js';
 import { resetMap } from './map.js';
 import { initSlider, setMinSliderValue } from './slider.js';
+import { initPictures } from './pictures.js';
 
 let pristine;
 const form = document.querySelector('.ad-form');
@@ -146,6 +147,9 @@ function initForm() {
     resetForms();
     resetMap();
   });
+
+  initPictures();
+
 }
 
 const disableForms = function() {
@@ -236,6 +240,7 @@ const getSelectedFeatures = function() {
   }
 
   return features;
+
 };
 
 const getFilter = function() {
